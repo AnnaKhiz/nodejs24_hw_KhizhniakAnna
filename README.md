@@ -1,1 +1,1 @@
-# node_study
+# nodejs24_hw_KhizhniakAnna
