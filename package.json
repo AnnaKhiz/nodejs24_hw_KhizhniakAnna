@@ -1,19 +1,19 @@
 {
-	"name": "homework_2",
-	"version": "1.0.0",
-	"description": "homework 2",
-	"main": "main.js",
-	"scripts": {
-		"start": "nodemon ./main.js"
-	},
-	"author": "khizhniak_anna",
-	"license": "ISC",
-	"dependencies": {
-		"colors": "^1.4.0",
-		"config": "^3.3.10",
-		"dotenv": "^16.4.1"
-	},
-	"devDependencies": {
-		"nodemon": "^3.0.3"
-	}
+  "name": "homework_2",
+  "version": "1.0.0",
+  "description": "homework 2",
+  "main": "main.js",
+  "scripts": {
+    "start": "nodemon ./main.js"
+  },
+  "author": "khizhniak_anna",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "config": "^3.3.10",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
 }
