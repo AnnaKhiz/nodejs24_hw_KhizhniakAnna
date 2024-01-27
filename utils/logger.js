@@ -1,23 +1,16 @@
 const colors = require('colors/safe');
 
 const logger = (param) => {
-  switch (process.env.LOG_LEVEL) {
-    case 'info':
-      return {
-        info: (...args) => console.log(colors.bgWhite(`${param}:`), ...args),
-        warn: (...args) => console.warn(colors.bgYellow(`${param}:`), ...args),
-        error: (...args) => console.error(colors.bgRed(`${param}:`), ...args),
-      }
-    case 'error':
-      return {
-        error: (...args) => console.error(colors.bgRed(`${param}:`), ...args),
-      }
-    default:
-      return {
-        warn: (...args) => console.warn(colors.bgYellow(`${param}:`), ...args),
-        error: (...args) => console.error(colors.bgRed(`${param}:`), ...args),
-      }
+
+  return {
+    info: (...args) => process.env.LOG_LEVEL === 'info'
+      ? console.log(colors.bgWhite(`${param}:`), ...args) : false,
+    warn: (...args) => process.env.LOG_LEVEL === 'warn' || process.env.LOG_LEVEL === 'info' || !process.env.LOG_LEVEL
+      ? console.error(colors.bgYellow(`${param}:`), ...args) : false,
+    error: (...args) => process.env.LOG_LEVEL === 'error' || process.env.LOG_LEVEL === 'info' || process.env.LOG_LEVEL === 'warn' || !process.env.LOG_LEVEL
+      ? console.error(colors.bgRed(`${param}:`), ...args) : false,
   }
+
 }
 
 module.exports = logger
