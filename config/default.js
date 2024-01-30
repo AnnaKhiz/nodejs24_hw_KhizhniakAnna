@@ -1,4 +1,4 @@
-const logColor = process.env.COLORS_ENABLED && process.env.COLORS_ENABLED == 1 ? 'enabled' : 'disabled';
+const logColor = process.env.COLORS_ENABLED && process.env.COLORS_ENABLED == 1 ? 1 : 0;
 
 const logLevel = (function () {
 	switch (process.env.LOG_LEVEL) {
