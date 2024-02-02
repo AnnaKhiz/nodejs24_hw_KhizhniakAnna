@@ -5,7 +5,7 @@ const logger = require('./utils/logger')('file_sync');
 let sourcePath = path.join('.', 'source');
 let targetPath = path.join('.', 'target');
 
-async function replaceFile(pathDefault) {
+async function synchronizeCatalogs(pathDefault) {
 	const sourceDirFilesArray = await fs.promises.readdir(pathDefault);
 
 	sourceDirFilesArray.forEach(file => {
@@ -40,22 +40,26 @@ async function checkCoincidencesAndCopyFile(file, pathDefault) {
 
 function copyDirectory(pathDefault, target, file) {
 	fs.mkdir(buildPath(targetPath, file), (err) => {
+		if (err.code === 'EEXIST') {
+			logger.warn(`The directory ${target} already exists`);
+		} else {
+			logger.error(err)
+		};
+
 		if (err) {
 			logger.error(`The directory "${target}" didn't create or already exist`);
 		}
 		targetPath = buildPath(target, file);
-		replaceFile(buildPath(pathDefault, file));
+		synchronizeCatalogs(buildPath(pathDefault, file));
 	})
 }
 
 async function copyFiles(pathName, target) {
-	const fileData = await fs.promises.readFile(pathName, 'utf8');
-	fs.writeFile(target, fileData, (error) => {
-		if (error) logger.error("The file didn't write");
-	})
-	logger.info(`The file from "${buildPath(pathName)}" was copied successfully to "${buildPath(target)}" directory`);
+	await fs.promises.copyFile(pathName, target)
+		.then(result => logger.info(`The file from "${buildPath(pathName)}" was copied successfully to "${buildPath(target)}" directory`))
+		.catch(error => logger.error(error));
 }
 
 module.exports = {
-	start: () => replaceFile(sourcePath)
+	start: () => synchronizeCatalogs(sourcePath)
 }
