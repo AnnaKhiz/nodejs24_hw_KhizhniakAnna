@@ -17,7 +17,7 @@ async function replaceFile(pathDefault) {
 			}
 
 			if (stat.isFile()) {
-				checkСoincidencesAndCopyFile(file, pathDefault);
+				checkCoincidencesAndCopyFile(file, pathDefault);
 			}
 		})
 	});
@@ -27,7 +27,7 @@ function buildPath(...args) {
 	return path.join('.', ...args);
 }
 
-async function checkСoincidencesAndCopyFile(file, pathDefault) {
+async function checkCoincidencesAndCopyFile(file, pathDefault) {
 	const targetDirFilesArray = await fs.promises.readdir(targetPath);
 
 	if (!targetDirFilesArray.includes(file)) {
