@@ -39,16 +39,14 @@ async function checkCoincidencesAndCopyFile(file, pathDefault) {
 
 
 function copyDirectory(pathDefault, target, file) {
+
 	fs.mkdir(buildPath(targetPath, file), (err) => {
-		if (err.code === 'EEXIST') {
+		if (err && err.code === 'EEXIST') {
 			logger.warn(`The directory ${target} already exists`);
-		} else {
+		} else if (err) {
 			logger.error(err)
 		};
 
-		if (err) {
-			logger.error(`The directory "${target}" didn't create or already exist`);
-		}
 		targetPath = buildPath(target, file);
 		synchronizeCatalogs(buildPath(pathDefault, file));
 	})
