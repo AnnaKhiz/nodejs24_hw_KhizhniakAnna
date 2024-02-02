@@ -5,7 +5,7 @@ const logger = (param) => {
 
 	return {
 		info: (...args) => config.logLevel === 'info'
-			? console.log(colors.bgWhite(`${param}:`), ...args) : false,
+			? console.log(colors.green(`${param}:`), ...args) : false,
 		warn: (...args) => config.logLevel === 'warn' || config.logLevel === 'info'
 			? console.error(colors.bgYellow(`${param}:`), ...args) : false,
 		error: (...args) => config.logLevel === 'error' || config.logLevel === 'info' || config.logLevel === 'warn'
