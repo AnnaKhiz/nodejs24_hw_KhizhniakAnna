@@ -47,5 +47,4 @@ process.on('beforeExit', () => {
 	writeStreamInfo.end();
 })
 
-
 module.exports = logger
