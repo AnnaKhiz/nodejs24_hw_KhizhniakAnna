@@ -15,8 +15,8 @@ function checkDirectory() {
 
 checkDirectory();
 
-const writeStreamError = fs.createWriteStream(path.join('.', 'logs', 'error.log'), { encoding: 'utf8' });
-const writeStreamInfo = fs.createWriteStream(path.join('.', 'logs', 'info.log'), { encoding: 'utf8' });
+const writeStreamError = fs.createWriteStream(path.join('.', 'logs', 'error.log'), { encoding: 'utf8', flags: 'a' });
+const writeStreamInfo = fs.createWriteStream(path.join('.', 'logs', 'info.log'), { encoding: 'utf8', flags: 'a' });
 
 const logger = (param) => {
 	return {
