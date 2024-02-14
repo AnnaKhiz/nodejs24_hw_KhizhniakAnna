@@ -45,6 +45,7 @@ const logger = (param) => {
 process.on('beforeExit', () => {
 	writeStreamError.end();
 	writeStreamInfo.end();
+	writeStreamWarning.end();
 })
 
 
