@@ -17,26 +17,27 @@ checkDirectory();
 
 const writeStreamError = fs.createWriteStream(path.join('.', 'logs', 'error.log'), { encoding: 'utf8', flags: 'a' });
 const writeStreamInfo = fs.createWriteStream(path.join('.', 'logs', 'info.log'), { encoding: 'utf8', flags: 'a' });
+const writeStreamWarning = fs.createWriteStream(path.join('.', 'logs', 'warning.log'), { encoding: 'utf8', flags: 'a' });
 
 const logger = (param) => {
 	return {
 		info: (...args) => {
 			if (config.logLevel === 'info') {
-				console.log(colors.green(`${param}:`), ...args);
+				console.log(colors.bgGreen(`${param}:`), ...args);
 			}
-			writeStreamInfo.write(`${param}: ${new Date().toISOString()} - ${args}\n`);
+			writeStreamInfo.write(`${param}: ${args}\n`);
 		},
 		warn: (...args) => {
 			if (config.logLevel === 'warn' || config.logLevel === 'info') {
 				console.error(colors.bgYellow(`${param}:`), ...args);
 			}
-			writeStreamError.write(`${param}: ${new Date().toISOString()} - ${args}\n`);
+			writeStreamWarning.write(`${param}: ${args}\n`);
 		},
 		error: (...args) => {
 			if (config.logLevel === 'error' || config.logLevel === 'info' || config.logLevel === 'warn') {
 				console.error(colors.bgRed(`${param}:`), ...args);
 			}
-			writeStreamError.write(`${param}: ${new Date().toISOString()} - ${args}\n`);
+			writeStreamError.write(`${param}: ${args}\n`);
 		}
 	}
 }
@@ -44,6 +45,7 @@ const logger = (param) => {
 process.on('beforeExit', () => {
 	writeStreamError.end();
 	writeStreamInfo.end();
+	writeStreamWarning.end();
 })
 
 
