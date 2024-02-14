@@ -4,7 +4,8 @@
   "description": "homework 2",
   "main": "main.js",
   "scripts": {
-    "start": "nodemon ./main.js"
+    "start": "nodemon ./main.js",
+	 "start:server": "nodemon ./server.js"
   },
   "author": "khizhniak_anna",
   "license": "ISC",
