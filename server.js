@@ -6,7 +6,7 @@ const port = 5000;
 
 server.listen(port);
 
-server.on('listening', () => console.log(`Server started on ${port} port`));
+server.on('listening', () => logger.info(`Server started on ${port} port`));
 
 server.on('request', (request, response) => {
 
@@ -15,10 +15,10 @@ server.on('request', (request, response) => {
 		response.write('healthcheck passed');
 		logger.info(`${request.method} ${request.url} ${response.statusCode}`);
 	} else {
-		response.writeHead(404, 'Not found');
+		response.writeHead(404);
 		logger.warn(`${request.method} ${request.url} ${response.statusCode}`);
 	}
-	console.log(`${request.method} ${request.url} ${response.statusCode}`);
+
 	response.end();
 
 })
