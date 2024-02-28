@@ -7,7 +7,6 @@ const path = require('path')
 const { validIDMiddleware, validUserDataMiddleware } = require("./middleware");
 const port = 3030;
 
-
 const server = express();
 const router = express.Router();
 const dbPath = path.join('.', 'database', 'users.json');
@@ -17,10 +16,7 @@ let usersData;
 const jsonBodyParser = express.json();
 server.use(jsonBodyParser);
 
-
-// в тебе тут був конфлікт послідовності промісів.
-// краще ініціалізацію бази зробити сінхронно! щоб воно гарантовано відбулось раніше ніж все інше
-fs.mkdirSync(path.join('.', 'database'), { recursive: true }); // створить папку, якщо нема - не впаде якщо вже є
+fs.mkdirSync(path.join('.', 'database'), { recursive: true });
 
 server.listen(port, async () => {
 	logger.info(`Server started on ${port} port`);
@@ -30,10 +26,8 @@ server.listen(port, async () => {
 		if (data) {
 			usersData = JSON.parse(data);
 		}
-	} catch(err) {
+	} catch (err) {
 		logger.info('Database file is empty');
-
-		// чому б не задати потрібну структуру одразу? Заодно позбудемось постійних перевірок на наявність ключа `users`
 		usersData = { users: [] };
 	}
 });
@@ -51,35 +45,33 @@ router.get('/', (req, resp) => {
 })
 
 router.get('/:userId', validIDMiddleware, (req, resp) => {
-		const id = req.params.userId;
-		const user = usersData.users.find(element => element.id === Number(id));
+	const id = req.params.userId;
+	const user = usersData.users.find(element => element.id === Number(id));
 
-	// неважливо чому юзер не знайдений - тим більше користувачам не треба давати інформацію про стан нашої бази ))
-		if (!user) {
-			resp.status(404);
+	if (!user) {
+		resp.status(404);
 		return resp.send('User not found');
-		}
+	}
 
-		resp.send(user);
+	resp.send(user);
 })
 
 router.post('/', validUserDataMiddleware, (req, resp) => {
-		usersData.users.push(req.body);
-	//TODO: Чому в ріспонсі немає юзер айді? ))
+	usersData.users.push(req.body);
 	resp.status(201).send(req.body);
 })
 
 router.delete('/:userId', validIDMiddleware, (req, resp) => {
-		const id = req.params.userId;
-		const index = usersData.users.findIndex(element => element.id === Number(id));
-		if (index === -1) {
-			resp.status(404);
+	const id = req.params.userId;
+	const index = usersData.users.findIndex(element => element.id === Number(id));
+	if (index === -1) {
+		resp.status(404);
 		return resp.send('User not found');
-		}
+	}
 
-		usersData.users.splice(index, 1);
-		resp.status(204);
-		resp.send('User was deleted successfully');
+	usersData.users.splice(index, 1);
+	resp.status(204);
+	resp.send('User was deleted successfully');
 })
 
 

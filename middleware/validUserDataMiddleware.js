@@ -2,6 +2,9 @@
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validUserDataMiddleware(req, resp, next) {
+	const id = Date.now();
+
+	req.body.id = id;
 
 	if (!req.body.username) {
 		resp.status(400)
