@@ -17,30 +17,25 @@ let usersData;
 const jsonBodyParser = express.json();
 server.use(jsonBodyParser);
 
-async function checkDirectory() {
-	try {
-		await fs.promises.mkdir(path.join('.', 'database'))
-		await fs.promises.writeFile(dbPath, '');
-	} catch (error) {
-		if (error.code !== 'EEXIST') {
-			logger.error(error);
-		}
-	}
-}
-checkDirectory();
 
-server.listen(port, () => {
+// в тебе тут був конфлікт послідовності промісів.
+// краще ініціалізацію бази зробити сінхронно! щоб воно гарантовано відбулось раніше ніж все інше
+fs.mkdirSync(path.join('.', 'database'), { recursive: true }); // створить папку, якщо нема - не впаде якщо вже є
+
+server.listen(port, async () => {
 	logger.info(`Server started on ${port} port`);
 
-	fs.promises.readFile(dbPath, 'utf8')
-		.then(res => {
-			if (res) {
-				usersData = JSON.parse(res);
-			} else {
-				usersData = {};
-				console.log('Database is empty');
-			}
-		});
+	try {
+		const data = await fs.promises.readFile(dbPath, 'utf8');
+		if (data) {
+			usersData = JSON.parse(data);
+		}
+	} catch(err) {
+		logger.info('Database file is empty');
+
+		// чому б не задати потрібну структуру одразу? Заодно позбудемось постійних перевірок на наявність ключа `users`
+		usersData = { users: [] };
+	}
 });
 
 const accessLogStream = fs.createWriteStream(path.join('logs', 'server-express-logs.log'), { flags: 'a' });
@@ -50,59 +45,41 @@ server.use(morgan(':method :url :status'));
 
 server.use('/users', router);
 
-server.use('/users/7', router);
-
-
 //!routes
 router.get('/', (req, resp) => {
-	usersData.users ? resp.send(usersData.users) : resp.send('Empty database');
+	resp.send(usersData.users);
 })
 
-router.get('/:userId', validUserDataMiddleware, (req, resp) => {
-	if (usersData.users) {
+router.get('/:userId', validIDMiddleware, (req, resp) => {
 		const id = req.params.userId;
-
 		const user = usersData.users.find(element => element.id === Number(id));
 
+	// неважливо чому юзер не знайдений - тим більше користувачам не треба давати інформацію про стан нашої бази ))
 		if (!user) {
 			resp.status(404);
-			resp.send('User not found');
+		return resp.send('User not found');
 		}
 
 		resp.send(user);
-	} else {
-		resp.send('Empty database');
-	}
 })
 
 router.post('/', validUserDataMiddleware, (req, resp) => {
-	if (usersData.users) {
-		resp.status(201)
 		usersData.users.push(req.body);
-		resp.send(req.body);
-	} else {
-		usersData.users = [];
-		usersData.users.push(req.body);
-		resp.send(req.body);
-	}
+	//TODO: Чому в ріспонсі немає юзер айді? ))
+	resp.status(201).send(req.body);
 })
 
 router.delete('/:userId', validIDMiddleware, (req, resp) => {
-	if (usersData.users) {
 		const id = req.params.userId;
 		const index = usersData.users.findIndex(element => element.id === Number(id));
 		if (index === -1) {
 			resp.status(404);
-			resp.send('User not found');
+		return resp.send('User not found');
 		}
 
 		usersData.users.splice(index, 1);
 		resp.status(204);
 		resp.send('User was deleted successfully');
-	} else {
-		resp.send('Empty database');
-	}
-
 })
 
 
