@@ -6,7 +6,7 @@ const colors = require('colors/safe');
 function checkDirectory() {
 	fs.mkdir(path.join('.', 'logs'), (error) => {
 		if (error && error.code === 'EEXIST') {
-			console.log('Directory already exist');
+			console.log(`Directory /${path.join('.', 'logs')}/ already exist`);
 		} else if (error) {
 			console.log(error);
 		}
