@@ -4,20 +4,43 @@ const express = require('express');
 const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path')
-const { validIDMiddleware, validUserDataMiddleware } = require("./middleware/index");
-const port = 3000;
+const { validIDMiddleware, validUserDataMiddleware } = require("./middleware");
+const port = 3030;
+
 
 const server = express();
 const router = express.Router();
+const dbPath = path.join('.', 'database', 'users.json');
 
 let usersData;
 
 const jsonBodyParser = express.json();
 server.use(jsonBodyParser);
 
+async function checkDirectory() {
+	try {
+		await fs.promises.mkdir(path.join('.', 'database'))
+		await fs.promises.writeFile(dbPath, '');
+	} catch (error) {
+		if (error.code !== 'EEXIST') {
+			logger.error(error);
+		}
+	}
+}
+checkDirectory();
+
 server.listen(port, () => {
 	logger.info(`Server started on ${port} port`);
-	fs.promises.readFile(path.join('logs', 'users.json'), 'utf8').then(res => usersData = JSON.parse(res));
+
+	fs.promises.readFile(dbPath, 'utf8')
+		.then(res => {
+			if (res) {
+				usersData = JSON.parse(res);
+			} else {
+				usersData = {};
+				console.log('Database is empty');
+			}
+		});
 });
 
 const accessLogStream = fs.createWriteStream(path.join('logs', 'server-express-logs.log'), { flags: 'a' });
@@ -27,53 +50,68 @@ server.use(morgan(':method :url :status'));
 
 server.use('/users', router);
 
-server.use('/users/2', router);
+server.use('/users/7', router);
 
 
 //!routes
 router.get('/', (req, resp) => {
-	resp.send(usersData.users)
+	usersData.users ? resp.send(usersData.users) : resp.send('Empty database');
 })
 
 router.get('/:userId', validUserDataMiddleware, (req, resp) => {
-	const id = req.params.userId;
+	if (usersData.users) {
+		const id = req.params.userId;
 
-	const user = usersData.users.find(element => element.id === Number(id));
+		const user = usersData.users.find(element => element.id === Number(id));
 
-	if (!user) {
-		resp.status(404);
-		resp.send('User not found');
+		if (!user) {
+			resp.status(404);
+			resp.send('User not found');
+		}
+
+		resp.send(user);
+	} else {
+		resp.send('Empty database');
 	}
-	resp.send(user);
 })
 
 router.post('/', validUserDataMiddleware, (req, resp) => {
-	usersData.users.push(req.body);
-	resp.send(req.body);
+	if (usersData.users) {
+		resp.status(201)
+		usersData.users.push(req.body);
+		resp.send(req.body);
+	} else {
+		usersData.users = [];
+		usersData.users.push(req.body);
+		resp.send(req.body);
+	}
 })
 
 router.delete('/:userId', validIDMiddleware, (req, resp) => {
-	const id = req.params.userId;
+	if (usersData.users) {
+		const id = req.params.userId;
+		const index = usersData.users.findIndex(element => element.id === Number(id));
+		if (index === -1) {
+			resp.status(404);
+			resp.send('User not found');
+		}
 
-	const index = usersData.users.findIndex(element => element.id === Number(id));
-
-	if (index === -1) {
-		resp.status(404);
-		resp.send('User not found');
+		usersData.users.splice(index, 1);
+		resp.status(204);
+		resp.send('User was deleted successfully');
+	} else {
+		resp.send('Empty database');
 	}
 
-	usersData.users.splice(index, 1);
-	resp.status(204);
-	resp.send('User was deleted successfully');
 })
 
 
 function stopServer() {
 	accessLogStream.end();
-	fs.writeFile(path.join('logs', 'users.json'), JSON.stringify(usersData), () => {
-		console.log('file successfully writen');
+
+	fs.writeFile(dbPath, JSON.stringify(usersData), () => {
+		console.log('File successfully writen');
 	});
 }
 
 process.on('SIGINT', stopServer);
-process.on('SIGTERM', stopServer);
